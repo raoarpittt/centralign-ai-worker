@@ -1,0 +1,9 @@
+[
+  {
+    "invoice_id": "INV-102",
+    "company": "ABC Ltd",
+    "amount": 52000,
+    "due_date": "2026-10-30",
+    "status": "processed"
+  }
+]

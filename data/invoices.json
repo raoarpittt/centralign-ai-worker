@@ -1,0 +1,23 @@
+[
+  {
+    "invoice_id": "INV-101",
+    "company": "ABC Ltd",
+    "invoice_date": "2026-09-20",
+    "amount": 45000,
+    "due_date": "2026-10-20"
+  },
+  {
+    "invoice_id": "INV-102",
+    "company": "ABC Ltd",
+    "invoice_date": "2026-10-05",
+    "amount": 52000,
+    "due_date": "2026-10-30"
+  },
+  {
+    "invoice_id": "INV-103",
+    "company": "XYZ Ltd",
+    "invoice_date": "2026-10-08",
+    "amount": 72000,
+    "due_date": "2026-11-07"
+  }
+]

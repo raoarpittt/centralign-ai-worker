@@ -1,84 +1,128 @@
-# CentrAlign AI Worker — Gemini-powered MVP
+# CentrAlign AI Worker — Gemini-Powered MVP
 
-A narrow autonomous AI worker that processes an invoice using a simulated finance system. The model chooses tools, observes results, and must verify the final state before claiming success.
+A narrow autonomous AI worker that processes invoice-related tasks using a simulated finance system. The worker accepts natural-language instructions, selects tools, observes their results, handles failures, and verifies the final state before claiming a write operation succeeded.
 
-## Setup (macOS)
+**Live Demo:** [Insert your deployed Streamlit URL]
 
-1. Install Python 3.10+ and create/activate a virtual environment.
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). The Gemini API offers a free tier for eligible models, subject to rate limits.
-4. Create your local environment file and add the key:
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and replace `your_api_key_here` with your key. Never commit `.env`.
-5. Run the worker:
-   ```bash
-   python main.py
-   ```
+**Source Code:** https://github.com/raoarpittt/centralign-ai-worker
 
-The CLI stays running so you can enter multiple tasks in one session. Type `exit` to quit. Press Enter to run the demo task.
+## Features
 
-## Demo task
+- Natural-language task input through a Streamlit web interface and CLI.
+- LLM-driven tool selection using Gemini.
+- Invoice search and retrieval.
+- Simulated finance-system updates.
+- Execution history and tool-result visibility.
+- Bounded execution and retry handling.
+- Verification of write operations before reporting success.
+- Clarification handling for ambiguous requests, subject to the current interface limitations.
 
-> Find the latest invoice from ABC Ltd and add it to the finance system.
+## Architecture
 
-The worker can call `search_invoices`, `get_invoice`, `update_finance_system`, `verify_invoice`, and `get_finance_record`. The finance system is simulated with local JSON data; no real finance system is changed.
+The application consists of the following components:
 
-## Design choices
+- `app.py`: Streamlit interface for submitting tasks and viewing execution results.
+- `main.py`: CLI entry point for running tasks interactively.
+- `agent/worker.py`: Agent execution loop, Gemini integration, tool selection, and execution control.
+- `agent/state.py`: Tracks execution steps, discovered facts, completion status, and the final response.
+- `tools/`: Contains the available invoice and finance-system tools.
+- `data/`: Contains local JSON records used by the simulated environment.
 
-- **Narrow scope:** invoice processing keeps the prototype focused on the task-worker brief.
-- **Tool-driven execution:** the model chooses the next action from a small allowlist of typed tools.
-- **Verification gate:** success is reported only after `verify_invoice` returns `verified=true`.
-- **Bounded execution:** at most 10 tool calls per task to avoid runaway loops.
-- **Observable behavior:** each tool call and result is printed for the demo.
+The worker sends the task to Gemini, executes selected tools, observes their results, and continues until the task is completed, blocked, or the execution limit is reached. Write tasks require a successful verification result before being reported as complete.
 
-## Limitations and next steps
+## Setup
 
-- Gemini free-tier quotas and model availability can vary by account and region.
-- The finance system is local simulation, not a production integration.
-- No persistent long-term memory, authentication, or approval UI yet.
-- Next: add unit tests, a browser/UI, explicit approval for consequential actions, and robust retry/backoff for rate limits.
+### Requirements
 
-## Iteration 2B: Tool Failure + Recovery
+- Python 3.10 or later, compatible with the project's dependencies.
+- A Gemini API key.
+- Dependencies listed in `requirements.txt`.
 
-The prototype can simulate a temporary finance-system failure so the agent's recovery behavior can be demonstrated.
+### Local installation
 
-For the demo, add this to `.env`:
+1. Clone the repository:
 
-```env
-SIMULATE_TOOL_FAILURE_ONCE=true
-```
+   `git clone https://github.com/raoarpittt/centralign-ai-worker.git`
 
-On the first `update_finance_system` call, the tool returns a temporary failure. The model receives the failure and should retry the update. The workflow should then continue to `verify_invoice` and only report success after verification.
+2. Enter the project directory:
 
-To return to the normal workflow, set:
+   `cd centralign-ai-worker`
 
-```env
-SIMULATE_TOOL_FAILURE_ONCE=false
-```
+3. Create and activate a virtual environment:
 
+   `python3 -m venv venv`
 
-## Iteration 3: Generalized invoice tasks
+   `source venv/bin/activate`
 
-The same agent can handle different natural-language tasks without separate hard-coded workflows, including:
+4. Install dependencies:
 
-1. Find the latest invoice from a company and add it to the finance system.
-2. Add a specific invoice by invoice ID.
-3. Check whether a specific invoice has been processed.
-4. Find all invoices for a company and summarize them.
+   `pip install -r requirements.txt`
 
-For write tasks, the worker still requires `verify_invoice` before claiming success. For read-only tasks, a successful tool result is sufficient.
+5. Create the local environment file:
 
-## Interactive loop
+   `cp .env.example .env`
 
-The program continues accepting tasks until the user enters:
+6. Add your Gemini API key to `.env`. Never commit this file or expose the key.
 
-```text
-exit
-```
+### Run the web interface
 
-Each new task starts a fresh agent run while the CLI process remains active.
+`streamlit run app.py`
+
+### Run the CLI
+
+`python main.py`
+
+## Demo Task
+
+Find the latest invoice from ABC Ltd and add it to the finance system.
+
+The available tools include `search_invoices`, `get_invoice`, `update_finance_system`, `verify_invoice`, and `get_finance_record`.
+
+The finance system is simulated using local JSON data. No real external finance system is modified.
+
+## Design Decisions
+
+- **Narrow scope:** Invoice processing keeps the prototype focused on a concrete business workflow.
+- **Tool-driven execution:** Gemini selects from a predefined set of available tools.
+- **Verification gate:** Write-task success depends on `verify_invoice` returning `verified=true`.
+- **Bounded execution:** Each task has a maximum step limit to prevent unbounded execution.
+- **Observability:** Tool calls and results are exposed to help users understand the execution process.
+- **Simulated environment:** Local data enables demonstration without production credentials or unauthorized access.
+
+## Assumptions
+
+- Invoice records are available in the local simulated dataset.
+- The model can choose among the tools exposed by the application.
+- The prototype is intended to demonstrate a limited invoice-processing workflow, not arbitrary computer use.
+- Finance-system updates affect the simulated environment only.
+
+## Known Limitations
+
+- The application supports a limited invoice-processing workflow.
+- The finance system is simulated rather than connected to a production service.
+- Model availability, latency, and API quotas can affect execution.
+- Execution is bounded by a configured step limit.
+- Browser-based clarification and human-approval handling may need further development.
+- Automated test coverage and production-grade security controls remain future work.
+
+## Future Improvements
+
+1. Add automated tests for successful tasks, tool failures, retries, and failed verification.
+2. Implement browser-native clarification and human-approval workflows.
+3. Improve structured error handling and retry policies.
+4. Add persistent audit logs and execution-history storage.
+5. Integrate external business systems through authenticated APIs.
+6. Expand evaluation across different task types and unexpected tool results.
+
+## Technology Stack
+
+- Python
+- Google Gemini API and Google Gen AI SDK
+- Streamlit
+- JSON-based simulated invoice and finance records
+- Additional dependencies listed in `requirements.txt`
+
+## Demo
+
+- **Live application:** [Insert your deployed Streamlit URL]
+- **Demo video:** [Insert your recording link, if available]

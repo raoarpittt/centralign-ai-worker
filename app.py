@@ -1,6 +1,15 @@
 
+
+import os
 import streamlit as st
+
+# Load Streamlit Cloud secrets into environment variables
+for key in ("GEMINI_API_KEY", "GEMINI_MODEL"):
+    if key in st.secrets:
+        os.environ[key] = str(st.secrets[key])
+
 from agent.worker import run_worker
+
 
 st.set_page_config(
     page_title="CentrAlign AI Worker",

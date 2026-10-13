@@ -7,7 +7,7 @@ from google.genai import types
 from .state import AgentState
 from tools.registry import TOOLS
 
-load_dotenv(override=True)
+load_dotenv()
 
 SYSTEM_INSTRUCTIONS = """
 You are an autonomous invoice-processing worker operating in a simulated company environment.
